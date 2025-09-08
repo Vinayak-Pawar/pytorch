@@ -517,7 +517,8 @@ class TestAutograd(FSDPTest):
 
 class TestGradientReduction(FSDPTest):
     @skip_if_lt_x_gpu(2)
-    def test_fsdp_gradient_reduction_cpu(self):
+    @parametrize("use_orig_params", [False, True])
+    def test_fsdp_gradient_reduction_cpu(self, use_orig_params: bool):
         """
         Tests that FSDP correctly averages gradients on CPU, which uses the
         gloo backend and does not support ReduceOp.AVG for reduce-scatter.
@@ -532,7 +533,8 @@ class TestGradientReduction(FSDPTest):
             model,
             auto_wrap_policy=ModuleWrapPolicy({nn.Linear}),
             device_id=torch.device("cpu"),
-            cpu_offload=CPUOffload(offload_params=True)
+            cpu_offload=CPUOffload(offload_params=True),
+            use_orig_params=use_orig_params,
         )
 
         # Dummy input and target
